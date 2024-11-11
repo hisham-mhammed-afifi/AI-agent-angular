@@ -1,6 +1,33 @@
-import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
-import { AppComponent } from './app/app.component';
+import {
+  ApplicationConfig,
+  provideExperimentalZonelessChangeDetection,
+  provideZoneChangeDetection,
+} from '@angular/core';
+import { createApplication } from '@angular/platform-browser';
+import {
+  createCustomElement,
+  NgElement,
+  WithProperties,
+} from '@angular/elements';
+import { WidgetComponent } from './widget/widget.component';
 
-bootstrapApplication(AppComponent, appConfig)
+declare global {
+  interface HTMLElementTagNameMap {
+    'chat-widget': NgElement & WithProperties<any>;
+  }
+}
+
+const appConfig: ApplicationConfig = {
+  providers: [provideExperimentalZonelessChangeDetection()],
+  // providers: [provideZoneChangeDetection({ eventCoalescing: true })],
+};
+
+createApplication(appConfig)
+  .then((app) => {
+    const widgetComponent = createCustomElement(WidgetComponent, {
+      injector: app.injector,
+    });
+
+    customElements.define('chat-widget', widgetComponent);
+  })
   .catch((err) => console.error(err));
